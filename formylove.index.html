@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>A Little Surprise ❤️</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#ff6b81;--muted:#9aa4b2}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    body{background:linear-gradient(180deg,#071029 0%, #0b1220 60%);color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:24px}
+    .wrap{max-width:980px;width:100%;display:grid;grid-template-columns:1fr 420px;gap:24px;align-items:center}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(255,255,255,0.01));backdrop-filter: blur(6px);border-radius:18px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+    .left{padding:8px}
+    h1{margin:0 0 6px;font-size:28px;letter-spacing:0.2px}
+    p.lead{margin:0 0 16px;color:var(--muted)}
+    .big-heart{width:100%;height:280px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 20%, rgba(255,107,129,0.12), transparent 10%);position:relative;overflow:hidden}
+    .heart{width:160px;height:160px;background:var(--accent);transform:rotate(-45deg);border-radius:20px 20px 0 0;position:relative;box-shadow:0 12px 30px rgba(255,107,129,0.18);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    .heart:before,.heart:after{content:"";position:absolute;width:160px;height:160px;background:var(--accent);border-radius:50%;top:-80px;left:0}
+    .heart:after{left:80px;top:0}
+    .btn-row{display:flex;gap:12px;margin-top:18px}
+    button{cursor:pointer;border:0;padding:12px 16px;border-radius:10px;font-weight:600}
+    .open{background:linear-gradient(90deg,#ff7b95,#ff6b81);color:white}
+    .side{display:flex;flex-direction:column;gap:12px}
+    .photo{height:220px;border-radius:12px;background-size:cover;background-position:center;border:3px solid rgba(255,255,255,0.04)}
+    .note{padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));color:var(--muted)}
+    .secret{display:flex;gap:8px;margin-top:10px}
+    input[type=text]{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    textarea{width:100%;min-height:140px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;resize:vertical}
+    .small{font-size:13px;color:var(--muted)}
+    footer{grid-column:1/-1;text-align:center;margin-top:12px;color:var(--muted);font-size:13px}
+
+    /* modal styles */
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.85));backdrop-filter: blur(6px);z-index:60;padding:24px}
+    .modal-card{max-width:920px;width:100%;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:16px;padding:20px;box-shadow:0 12px 40px rgba(2,6,23,0.6);position:relative}
+    .photo-large{height:480px;border-radius:12px;background-size:cover;background-position:center;border:6px solid rgba(255,255,255,0.03)}
+    .close-btn{position:absolute;right:12px;top:12px;background:transparent;border:0;font-size:18px;color:var(--muted);cursor:pointer}
+
+    /* message modal */
+    .message-graphic{display:flex;gap:18px;align-items:flex-start}
+    .graphic-card{flex:0 0 200px;height:200px;border-radius:12px;background:linear-gradient(135deg,#ff7b95,#ffb3c8);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:white}
+    .message-area{flex:1}
+    .reveal-msg{padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.15), rgba(255,255,255,0.02));min-height:120px}
+
+    /* responsive */
+    @media (max-width:900px){.wrap{grid-template-columns:1fr;}.big-heart{height:220px}.side{order:2}.photo-large{height:320px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card left">
+      <h1>To the most beautiful person I know</h1>
+      <p class="lead">I made this little surprise just for you — press the button when you're ready.</p>
+
+      <div class="big-heart" aria-hidden="true">
+        <div class="heart" id="heart">Open</div>
+        <canvas id="confetti-canvas" style="position:absolute;inset:0;pointer-events:none"></canvas>
+      </div>
+
+      <div class="btn-row">
+        <button class="open" id="openBtn">Open your surprise 🎁</button>
+      </div>
+
+      <div class="note" id="reveal" style="display:none;">
+        <h2 style="margin:0 0 8px">Surprise — read me 💌</h2>
+        <p style="margin:0 0 8px">[This area is kept for fallback/notes. Primary interaction uses the picture modal and secret unlock.]</p>
+        <p class="small">Pro tip: replace the placeholder image on the right with a photo of you two for extra points.</p>
+      </div>
+
+      <div style="margin-top:12px" class="small">Want this page private? Host it on GitHub Pages or Netlify and send the link only to her.</div>
+    </div>
+
+    <div class="card side">
+      <div class="photo" id="photo" style="background-image:url('https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=60');"></div>
+      <div class="note">
+        <div style="font-weight:700">A tiny secret</div>
+        <div class="small">Ask her to type the secret word to unlock a hidden message. When she types it, a little graphic popup will appear where you can put your message.</div>
+        <div class="secret">
+          <input type="text" id="secretInput" placeholder="Type the secret word" />
+          <button id="unlockBtn" style="padding:8px 10px;border-radius:8px">Unlock</button>
+        </div>
+        <div id="secretMsg" class="small" style="margin-top:8px"></div>
+      </div>
+
+      <div class="note small">Customize: change the cover photo URL (div#photo), and change the secret word in the script.</div>
+    </div>
+
+    <footer class="card small">Made with ♥ — Inshallah she loves it. Want me to personalise colours or text?</footer>
+  </div>
+
+  <!-- Photo modal (opens when clicking Surprise) -->
+  <div id="photoModal" class="modal" style="display:none">
+    <div class="modal-card">
+      <button class="close-btn" id="closePhoto">✕</button>
+      <div class="photo-large" id="photoLarge" style="background-image:url('https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1600&q=80');"></div>
+      <div style="margin-top:12px;color:var(--muted);font-size:14px">Click the photo to zoom. Close when you're ready.</div>
+    </div>
+  </div>
+
+  <!-- Message modal (opens when secret is correct) -->
+  <div id="messageModal" class="modal" style="display:none">
+    <div class="modal-card" style="max-width:760px">
+      <button class="close-btn" id="closeMessage">✕</button>
+      <div class="message-graphic">
+        <div class="graphic-card">❤</div>
+        <div class="message-area">
+          <div style="font-weight:700;margin-bottom:8px">Hidden Message — write what you want</div>
+          <textarea id="messageInput" placeholder="Type your message here... (you can edit this before sharing)">My love, every day with you is my favourite day. — Yours always ❤️</textarea>
+          <div style="display:flex;gap:10px;margin-top:10px;justify-content:flex-end">
+            <button id="saveMsg" class="open">Save & Reveal</button>
+            <button id="closeMsg" class="small" style="background:transparent;color:var(--muted);padding:10px 12px;border-radius:8px">Close</button>
+          </div>
+          <div id="finalMsg" style="margin-top:12px;display:none">
+            <div class="reveal-msg" id="revealArea"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- confetti ---
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize(){W=canvas.width=canvas.clientWidth;H=canvas.height=canvas.clientHeight}
+    window.addEventListener('resize',resize);resize();
+
+    function rand(min,max){return Math.random()*(max-min)+min}
+    function makeConfetti(){
+      const colors = ['#ff7b95','#ffd166','#a0e9fd','#b8ffb2','#ffb3ff'];
+      const pieces=[];
+      for(let i=0;i<80;i++){
+        pieces.push({x:rand(0,W),y:rand(-H,0),w:rand(6,12),h:rand(8,14),vx:rand(-1.5,1.5),vy:rand(2,6),r:rand(0,360),c:colors[i%colors.length]});
+      }
+      let t=0;
+      function loop(){ctx.clearRect(0,0,W,H);for(const p of pieces){p.x+=p.vx;p.y+=p.vy;p.r+=p.vx*2;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();if(p.y>H+20){p.y=-20;p.x=rand(0,W)} }t++;if(t<300)requestAnimationFrame(loop);else ctx.clearRect(0,0,W,H);
+      }
+      loop();
+    }
+
+    // --- open photo modal ---
+    const openBtn=document.getElementById('openBtn');
+    const photoModal=document.getElementById('photoModal');
+    const closePhoto=document.getElementById('closePhoto');
+    const photoLarge=document.getElementById('photoLarge');
+    const photoThumb=document.getElementById('photo');
+
+    openBtn.addEventListener('click',()=>{
+      // reveal photo modal instead of text/music
+      photoModal.style.display='flex';
+      // small heart pulse
+      const heart=document.getElementById('heart');
+      heart.animate([{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}],{duration:700,iterations:4});
+      makeConfetti();
+    });
+
+    closePhoto.addEventListener('click',()=>{photoModal.style.display='none'})
+    photoLarge.addEventListener('click',()=>{photoLarge.style.transform='scale(1.03)';setTimeout(()=>{photoLarge.style.transform='scale(1)';},400)})
+
+    // clicking the right-side small photo opens the same modal (convenience)
+    photoThumb.addEventListener('click',()=>{photoModal.style.display='flex'})
+
+    // --- secret unlock / message modal ---
+    const unlockBtn=document.getElementById('unlockBtn');
+    const secretInput=document.getElementById('secretInput');
+    const secretMsg=document.getElementById('secretMsg');
+    const messageModal=document.getElementById('messageModal');
+    const closeMessage=document.getElementById('closeMessage');
+    const closeMsg=document.getElementById('closeMsg');
+    const saveMsg=document.getElementById('saveMsg');
+    const messageInput=document.getElementById('messageInput');
+    const finalMsg=document.getElementById('finalMsg');
+    const revealArea=document.getElementById('revealArea');
+
+    const secret='starlight'; // change this to whatever secret word you want
+
+    unlockBtn.addEventListener('click',()=>{
+      const val=secretInput.value.trim().toLowerCase();
+      if(!val){secretMsg.textContent='Type the secret word to unlock.';return}
+      if(val===secret){
+        secretMsg.textContent='You found it! Opening the hidden message...';
+        setTimeout(()=>{ messageModal.style.display='flex'; makeConfetti(); },400);
+      } else {secretMsg.textContent='Not quite — try again :)'}
+    });
+
+    closeMessage.addEventListener('click',()=>{messageModal.style.display='none'})
+    closeMsg.addEventListener('click',()=>{messageModal.style.display='none'})
+
+    saveMsg.addEventListener('click',()=>{
+      const txt=messageInput.value.trim();
+      if(!txt){alert('Please type your message first.');return}
+      // display the message with a small animation
+      revealArea.innerHTML='';
+      const p=document.createElement('div');
+      p.style.fontSize='18px';p.style.lineHeight='1.5';p.style.whiteSpace='pre-wrap';p.style.opacity='0';p.textContent=txt;
+      revealArea.appendChild(p);
+      finalMsg.style.display='block';
+      // simple fade-in and confetti
+      let a=0;const fade=setInterval(()=>{a+=0.08;p.style.opacity=a.toString();if(a>=1){clearInterval(fade);}},40);
+      makeConfetti();
+      // optionally lock editing (you can still edit if you reopen)
+    });
+
+    // Accessibility: Enter key on secret triggers unlock
+    secretInput.addEventListener('keydown',(e)=>{if(e.key==='Enter'){unlockBtn.click()}})
+
+    // helpful comments for editing:
+    // - Replace the two photo URLs (div#photo and #photoLarge) with your couple photo (prefer 1600px for large).
+    // - Change the `secret` constant above to whatever secret word you choose.
+    // - Edit the default text in the textarea (messageInput) or leave empty and type your message when she unlocks it.
+    // - To host: upload this single file to GitHub Pages or Netlify.
+  </script>
+</body>
+</html>
